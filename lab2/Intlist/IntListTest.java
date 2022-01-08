@@ -55,6 +55,27 @@ public class IntListTest {
         IntList exp = IntList.of(1, 2, 3, 4, 5, 6);
         assertEquals(exp, IntList.dcatenate(A, B));
         assertEquals(IntList.of(1, 2, 3, 4, 5, 6), A);
+
+        A = IntList.of(1, 2, 3);
+        B = null;
+        exp = IntList.of(1, 2, 3);
+        assertEquals(exp, IntList.dcatenate(A, B));
+        assertEquals(IntList.of(1, 2, 3), A);
+    }
+
+    @Test
+    public void testDcatenateIterative() {
+        IntList A = IntList.of(1, 2, 3);
+        IntList B = IntList.of(4, 5, 6);
+        IntList exp = IntList.of(1, 2, 3, 4, 5, 6);
+        assertEquals(exp, IntList.dcatenateIterative(A, B));
+        assertEquals(IntList.of(1, 2, 3, 4, 5, 6), A);
+
+        A = IntList.of(1, 2, 3);
+        B = null;
+        exp = IntList.of(1, 2, 3);
+        assertEquals(exp, IntList.dcatenateIterative(A, B));
+        assertEquals(IntList.of(1, 2, 3), A);
     }
 
     @Test
@@ -64,6 +85,51 @@ public class IntListTest {
         IntList exp = IntList.of(1, 2, 3, 4, 5, 6);
         assertEquals(exp, IntList.catenate(A, B));
         assertEquals(IntList.of(1, 2, 3), A);
+
+        A = IntList.of(1, 2, 3);
+        B = null;
+        exp = IntList.of(1, 2, 3);
+        assertEquals(exp, IntList.catenate(A, B));
+        assertEquals(IntList.of(1, 2, 3), A);
+
+        A = null;
+        B = IntList.of(1, 2, 3);
+        exp = IntList.of(1, 2, 3);
+        assertEquals(exp, IntList.catenate(A, B));
+        assertEquals(null, A);
+
+        A = null;
+        B = null;
+        exp = null;
+        assertEquals(exp, IntList.catenate(A, B));
+        assertEquals(null, A);
+    }
+
+    @Test
+    public void testCatenateIterative() {
+        IntList A = IntList.of(1, 2, 3);
+        IntList B = IntList.of(4, 5, 6);
+        IntList exp = IntList.of(1, 2, 3, 4, 5, 6);
+        assertEquals(exp, IntList.catenateIterative(A, B));
+        assertEquals(IntList.of(1, 2, 3), A);
+
+        A = IntList.of(1, 2, 3);
+        B = null;
+        exp = IntList.of(1, 2, 3);
+        assertEquals(exp, IntList.catenateIterative(A, B));
+        assertEquals(IntList.of(1, 2, 3), A);
+
+        A = null;
+        B = IntList.of(1, 2, 3);
+        exp = IntList.of(1, 2, 3);
+        assertEquals(exp, IntList.catenateIterative(A, B));
+        assertEquals(null, A);
+
+        A = null;
+        B = null;
+        exp = null;
+        assertEquals(exp, IntList.catenateIterative(A, B));
+        assertEquals(null, A);
     }
 
 }

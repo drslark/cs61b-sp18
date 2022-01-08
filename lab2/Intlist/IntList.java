@@ -12,6 +12,7 @@ public class IntList {
      * First element of list.
      */
     public int first;
+
     /**
      * Remaining elements of list.
      */
@@ -81,8 +82,36 @@ public class IntList {
      */
 
     public static IntList dcatenate(IntList A, IntList B) {
-        //TODO:  fill in method
-        return null;
+        if (A == null) {
+            return B;
+        }
+
+        if (A.rest == null) {
+            A.rest = B;
+            return A;
+        }
+
+        dcatenate(A.rest, B);
+        return A;
+    }
+
+    /**
+     * Returns a list consisting of the elements of A followed by the
+     * *  elements of B.  May modify items of A. Don't use 'new'.
+     */
+
+    public static IntList dcatenateIterative(IntList A, IntList B) {
+        if (A == null) {
+            return B;
+        }
+
+        IntList ptr = A;
+        while (ptr.rest != null) {
+            ptr = ptr.rest;
+        }
+
+        ptr.rest = B;
+        return A;
     }
 
     /**
@@ -90,11 +119,69 @@ public class IntList {
      * * elements of B.  May NOT modify items of A.  Use 'new'.
      */
     public static IntList catenate(IntList A, IntList B) {
-        //TODO:  fill in method
-        return null;
+        if (A == null) {
+            return copy(B);
+        }
+        
+        return new IntList(A.first, catenate(A.rest, B));
     }
 
+    /**
+     * Returns a list consisting of the elements of A followed by the
+     * * elements of B.  May NOT modify items of A.  Use 'new'.
+     */
+    public static IntList catenateIterative(IntList A, IntList B) {
+        if (A == null) {
+            return copyIterative(B);
+        }
 
+        IntList res = new IntList(A.first, null);
+        IntList ptr = res;
+        A = A.rest;
+        
+        while (A != null) {
+            ptr.rest = new IntList(A.first, null);
+            ptr = ptr.rest;
+            A = A.rest;
+        }
+        ptr.rest = copyIterative(B);
+
+        return res;
+    }
+
+    /**
+     * Copy a IntList.
+     * @return A new list.
+     */
+    private static IntList copy(IntList L) {
+        if (L == null) {
+            return null;
+        }
+
+        return new IntList(L.first, copy(L.rest));
+    }
+
+    /**
+     * Copy a IntList iteratively.
+     * @return A new list.
+     */
+    private static IntList copyIterative(IntList L) {
+        if (L == null) {
+            return null;
+        }
+
+        IntList res = new IntList(L.first, null);
+        IntList ptr = res;
+        L = L.rest;
+
+        while (L != null) {
+            ptr.rest = new IntList(L.first, null);
+            ptr = ptr.rest;
+            L = L.rest;
+        }
+
+        return  res;
+    }
 
 
 
