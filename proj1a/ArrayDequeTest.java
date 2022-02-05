@@ -2,7 +2,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 /** Performs some basic linked list tests. */
-public class LinkedListDequeTest {
+public class ArrayDequeTest {
 
     /* Utility class for generating random item. */
     public static class RandomItemGenerator<T> {
@@ -18,13 +18,12 @@ public class LinkedListDequeTest {
         }
     }
 
-
     /* Utility method for getting private constructor. */
     @SuppressWarnings("rawtypes")
-    private static Constructor<LinkedListDeque> getLinkedListDequeDeclaredConstructor() {
-        Class<LinkedListDeque> clazz = LinkedListDeque.class;
+    private static Constructor<ArrayDeque> getArrayDequeDeclaredConstructor() {
+        Class<ArrayDeque> clazz = ArrayDeque.class;
         try {
-            Constructor<LinkedListDeque> declaredConstructor = clazz.getDeclaredConstructor(clazz);
+            Constructor<ArrayDeque> declaredConstructor = clazz.getDeclaredConstructor(clazz);
             declaredConstructor.setAccessible(true);
             return declaredConstructor;
         } catch (NoSuchMethodException ex) {
@@ -34,10 +33,10 @@ public class LinkedListDequeTest {
 
     /* Utility method for checking resize ability. */
     @SuppressWarnings("unchecked")
-    public static <T> LinkedListDeque<T> getLinkedListDequeFromOther(LinkedListDeque<T> other) {
+    public static <T> ArrayDeque<T> getArrayDequeFromOther(ArrayDeque<T> other) {
         try {
-            return (LinkedListDeque<T>)
-                    getLinkedListDequeDeclaredConstructor().newInstance(other);
+            return (ArrayDeque<T>)
+                    getArrayDequeDeclaredConstructor().newInstance(other);
         } catch (
                 InstantiationException
                         | IllegalAccessException
@@ -49,29 +48,28 @@ public class LinkedListDequeTest {
 
     /* Utility method for adding some random items. */
     public static <T> void addSomeRandomItems(
-            LinkedListDeque<T> linkedListDeque, RandomItemGenerator<T> randomGenerator, int num
+            ArrayDeque<T> arrayDeque, RandomItemGenerator<T> randomGenerator, int num
     ) {
         for (int i = 0; i < num; i++) {
             if (Math.random() < 0.5) {
-                linkedListDeque.addFirst(randomGenerator.generate());
+                arrayDeque.addFirst(randomGenerator.generate());
             } else {
-                linkedListDeque.addLast(randomGenerator.generate());
+                arrayDeque.addLast(randomGenerator.generate());
             }
         }
     }
 
     /* Utility method for removing some random items. */
-    public static <T> void removeSomeRandomItems(LinkedListDeque<T> linkedListDeque, int num) {
+    public static <T> void removeSomeRandomItems(ArrayDeque<T> arrayDeque, int num) {
         for (int i = 0; i < num; i++) {
             if (Math.random() < 0.5) {
-                linkedListDeque.removeFirst();
+                arrayDeque.removeFirst();
             } else {
-                linkedListDeque.removeLast();
+                arrayDeque.removeLast();
             }
         }
     }
-
-
+    
     /* Utility method for printing out empty checks. */
     public static boolean checkEmpty(boolean expected, boolean actual) {
         if (expected != actual) {
@@ -110,7 +108,7 @@ public class LinkedListDequeTest {
                 "Make sure to uncomment the lines below (and delete this print statement)."
         );
 
-        LinkedListDeque<String> lld1 = new LinkedListDeque<String>();
+        ArrayDeque<String> lld1 = new ArrayDeque<String>();
 
         boolean passed = checkEmpty(true, lld1.isEmpty());
 
@@ -131,7 +129,7 @@ public class LinkedListDequeTest {
         lld1.printDeque();
 
         printTestStatus(passed);
-
+        
     }
 
     /** Adds an item, then removes an item, and ensures that dll is empty afterwards. */
@@ -143,7 +141,7 @@ public class LinkedListDequeTest {
                 "Make sure to uncomment the lines below (and delete this print statement)."
         );
 
-        LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
+        ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
         // should be empty 
         boolean passed = checkEmpty(true, lld1.isEmpty());
 
@@ -162,8 +160,8 @@ public class LinkedListDequeTest {
     /** Adds some items, then removes them, after that, adds some items,
      * copy items to another deque
      * check the size and print deque. */
-    public static void addCopyConstructorTest() {
-        System.out.println("Running copy constructor test.");
+    public static void addResizeTest() {
+        System.out.println("Running resize test.");
 
         System.out.println(
                 "Make sure to uncomment the lines below (and delete this print statement)."
@@ -172,7 +170,7 @@ public class LinkedListDequeTest {
         RandomItemGenerator<Integer> generator = new RandomItemGenerator<>(
                 new Integer[]{1, 2, 3, 4, 5, 6}
         );
-        LinkedListDeque<Integer> first = new LinkedListDeque<>();
+        ArrayDeque<Integer> first = new ArrayDeque<>();
 
         addSomeRandomItems(first, generator, 16);
         boolean passed = checkSize(first.size(), 16);
@@ -183,7 +181,7 @@ public class LinkedListDequeTest {
         addSomeRandomItems(first, generator, 3);
         passed = checkSize(first.size(), 3) && passed;
 
-        LinkedListDeque<Integer> second = getLinkedListDequeFromOther(first);
+        ArrayDeque<Integer> second = getArrayDequeFromOther(first);
         passed = checkSize(second.size(), 3) && passed;
 
         first.printDeque();
@@ -192,11 +190,10 @@ public class LinkedListDequeTest {
         printTestStatus(passed);
     }
 
-
     public static void main(String[] args) {
         System.out.println("Running tests.\n");
         addIsEmptySizeTest();
         addRemoveTest();
-        addCopyConstructorTest();
+        addResizeTest();
     }
 }
