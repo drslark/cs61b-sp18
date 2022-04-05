@@ -2,7 +2,7 @@
  * An SLList is a list of integers, which hides the terrible truth
  * of the nakedness within.
  */
-public class SLList<GloopGlop> implements List<GloopGlop> {
+public class SLList<GloopGlop> implements LastAdder<GloopGlop>, List61B<GloopGlop> {
 
     private static class StuffNode<BleepBlorp> {
         public BleepBlorp item;
@@ -51,11 +51,24 @@ public class SLList<GloopGlop> implements List<GloopGlop> {
      *
      * @param x The added item.
      */
+    @Override
     public void addFirst(GloopGlop x) {
         sentinel.next = new StuffNode<>(x, sentinel.next);
         if (last == sentinel) {
             last = sentinel.next;
         }
+        size += 1;
+    }
+
+    /**
+     * Adds x to the end of the list.
+     *
+     * @param x The added item.
+     */
+    @Override
+    public void addLast(GloopGlop x) {
+        last.next = new StuffNode<>(x, null);
+        last = last.next;
         size += 1;
     }
 
@@ -82,25 +95,26 @@ public class SLList<GloopGlop> implements List<GloopGlop> {
      *
      * @return The first item in the list.
      */
+    @Override
     public GloopGlop getFirst() {
         return sentinel.next.item;
     }
 
     /**
-     * Adds x to the end of the list.
+     * Returns the last item in the list;
      *
-     * @param x The added item.
+     * @return The last item in the list.
      */
-    public void addLast(GloopGlop x) {
-        last.next = new StuffNode<>(x, null);
-        last = last.next;
-        size += 1;
+    @Override
+    public GloopGlop getLast() {
+        return last.item;
     }
 
     /**
      * Removes the last item of the list.
      */
-    public void removeLast() {
+    @Override
+    public GloopGlop removeLast() {
         if (last == sentinel) {
             throw new RuntimeException("There are no items.");
         }
@@ -110,10 +124,34 @@ public class SLList<GloopGlop> implements List<GloopGlop> {
             lastPrev = lastPrev.next;
         }
 
+        GloopGlop item = last.item;
         last = lastPrev;
         last.next = null;
 
         size -= 1;
+
+        return item;
+    }
+
+    /**
+     * Returns the index's item.
+     *
+     * @param index The item's position.
+     * @return The needed item.
+     */
+    @Override
+    public GloopGlop get(int index) {
+        if (index < 0 && index >= size) {
+            throw new RuntimeException(String.format("Invalid index: %d!", index));
+        }
+
+        StuffNode<GloopGlop> node = sentinel.next;
+        while (index > 0) {
+            node = node.next;
+            index -= 1;
+        }
+
+        return node.item;
     }
 
     /**
@@ -122,7 +160,8 @@ public class SLList<GloopGlop> implements List<GloopGlop> {
      * @param item The item to be inserted.
      * @param index The position to insert item at.
      */
-    public void insert (GloopGlop item, int index) {
+    @Override
+    public void insert(GloopGlop item, int index) {
         if (index < 0) {
             throw new RuntimeException("index must be positive!");
         }
@@ -138,6 +177,16 @@ public class SLList<GloopGlop> implements List<GloopGlop> {
             last = node;
         }
         size += 1;
+    }
+
+    /**
+     * Returns the size of the list.
+     *
+     * @return the size of the list.
+     */
+    @Override
+    public int size() {
+        return size;
     }
 
     /**
@@ -222,12 +271,15 @@ public class SLList<GloopGlop> implements List<GloopGlop> {
     }
 
     /**
-     * Returns the size of the list.
-     *
-     * @return the size of the list.
+     * Prints out the entire list efficiently.
      */
-    public int size() {
-        return size;
+    @Override
+    public void print() {
+        System.out.println("The boss does not know everything!");
+        for (StuffNode<GloopGlop> node = sentinel.next; node != null; node = node.next) {
+            System.out.print(node.item + " ");
+        }
+        System.out.println();
     }
 
     /**

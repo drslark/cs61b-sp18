@@ -1,4 +1,4 @@
-public class DLList<GloopGlop> implements List<GloopGlop> {
+public class DLList<GloopGlop> implements LastAdder<GloopGlop> {
 
     private static class StuffNode<BleepBlorp> {
         public BleepBlorp item;

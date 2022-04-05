@@ -2,7 +2,7 @@
 // the position of the item to be inserted is always size.
 // The position of the last item is always size - 1.
 // the number of the items is always size.
-public class AList<GloopGlop> implements List<GloopGlop> {
+public class AList<GloopGlop> implements LastAdder<GloopGlop>, List61B<GloopGlop> {
 
     private GloopGlop[] items;
 
@@ -43,10 +43,31 @@ public class AList<GloopGlop> implements List<GloopGlop> {
     }
 
     /**
+     * Inserts item into the front of the list.
+     *
+     * @param item The item to insert.
+     */
+    @Override
+    public void addFirst(GloopGlop item) {
+        if (size == items.length) {
+            int expectedCapacity = Math.max(size + 1, items.length + items.length >> 2);
+            resize(expectedCapacity);
+        }
+
+        for (int i = size; i > 0; i--) {
+            items[i] = items[i - 1];
+        }
+
+        items[0] = item;
+        size += 1;
+    }
+
+    /**
      * Inserts item into the back of the list.
      *
      * @param item The item to insert.
      */
+    @Override
     public void addLast(GloopGlop item) {
         if (size == items.length) {
             int expectedCapacity = Math.max(size + 1, items.length + (items.length >> 2));
@@ -58,10 +79,25 @@ public class AList<GloopGlop> implements List<GloopGlop> {
     }
 
     /**
+     * Gets the item from front of the list.
+     *
+     * @return The item at the back of the list.
+     */
+    @Override
+    public GloopGlop getFirst() {
+        if (size == 0) {
+            throw new RuntimeException("The list is empty!");
+        }
+
+        return items[0];
+    }
+
+    /**
      * Gets the item from back of the list.
      *
      * @return The item at the back of the list.
      */
+    @Override
     public GloopGlop getLast() {
         if (size == 0) {
             throw new RuntimeException("The list is empty!");
@@ -97,6 +133,7 @@ public class AList<GloopGlop> implements List<GloopGlop> {
      * @param index the index of the item.
      * @return The item at the given index.
      */
+    @Override
     public GloopGlop get(int index) {
         if (index < 0 || index >= size) {
             return null;
@@ -106,10 +143,36 @@ public class AList<GloopGlop> implements List<GloopGlop> {
     }
 
     /**
+     * Inserts the given item at the given position.
+     *
+     * @param item The item to be inserted.
+     * @param index The position to insert item at.
+     */
+    @Override
+    public void insert(GloopGlop item, int index) {
+        if (index >= size) {
+            throw new RuntimeException("Invalid index for the list!");
+        }
+
+        if (size == items.length) {
+            int expectedCapacity = Math.max(size + 1, items.length + items.length >> 2);
+            resize(expectedCapacity);
+        }
+
+        for (int i = size; i > index; i--) {
+            items[i] = items[i - 1];
+        }
+
+        items[index] = item;
+        size += 1;
+    }
+
+    /**
      * Gets the number of items in the list.
      *
      * @return The items' number in the list.
      */
+    @Override
     public int size() {
         return size;
     }
