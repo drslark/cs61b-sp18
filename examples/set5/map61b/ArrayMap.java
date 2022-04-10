@@ -2,13 +2,14 @@ package map61b;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
  * An array based implementation of the Map61B class.
  */
-public class ArrayMap<K, V> implements Map61B<K, V> {
+public class ArrayMap<K, V> implements Map61B<K, V>, Iterable<ArrayMap.Entry<K, V>> {
 
     private final int CAPACITY = 10;
 
@@ -88,6 +89,55 @@ public class ArrayMap<K, V> implements Map61B<K, V> {
         return size;
     }
 
+    @Override
+    public Iterator<Entry<K, V>> iterator() {
+        return new MapIterator<>(this);
+    }
+
+    private static class MapIterator<Key, Value> implements Iterator<Entry<Key, Value>> {
+
+        private int currIndex;
+
+        private final ArrayMap<Key, Value> arrayMap;
+
+        public MapIterator(ArrayMap<Key, Value> arrayMap) {
+            this.arrayMap = arrayMap;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return currIndex < arrayMap.size;
+        }
+
+        @Override
+        public Entry<Key, Value> next() {
+            Entry<Key, Value> entry = new Entry<>(arrayMap.keys[currIndex], arrayMap.values[currIndex]);
+            currIndex++;
+            return entry;
+        }
+    }
+
+    public static class Entry<Key, Value> {
+
+        private final Key key;
+
+        private final Value value;
+
+        public Entry(Key k, Value v) {
+            key = k;
+            value = v;
+        }
+
+        public Key getKey() {
+            return key;
+        }
+
+        public Value getValue() {
+            return value;
+        }
+
+    }
+
     @Test
     public void test() {
         ArrayMap<Integer, Integer> arrayMap = new ArrayMap<>();
@@ -101,5 +151,14 @@ public class ArrayMap<K, V> implements Map61B<K, V> {
         arrayMap.put("horse", 3);
         arrayMap.put("fish", 9);
         arrayMap.put("house", 10);
+
+        ArrayMap<String, Integer> theOtherArrayMap = new ArrayMap<>();
+        theOtherArrayMap.put("hello", 5);
+        theOtherArrayMap.put("syrups", 10);
+        theOtherArrayMap.put("kingdom", 10);
+
+        for (Entry<String, Integer> entry : theOtherArrayMap) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
     }
 }

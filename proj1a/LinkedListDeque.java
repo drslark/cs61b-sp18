@@ -5,7 +5,7 @@ public class LinkedListDeque<T> {
         StuffNode<E> prev;
         StuffNode<E> next;
 
-        public StuffNode(E i, StuffNode<E> p, StuffNode<E> n) {
+        StuffNode(E i, StuffNode<E> p, StuffNode<E> n) {
             item = i;
             prev = p;
             next = n;
@@ -81,16 +81,16 @@ public class LinkedListDeque<T> {
      * Print the items in the deque from first to last.
      */
     public void printDeque() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder stringBuilder = new StringBuilder();
 
         for (StuffNode<T> p = sentinel.next; p != sentinel; p = p.next) {
-            sb.append(p.item).append(" ");
+            stringBuilder.append(p.item);
+            if (p.next != sentinel) {
+                stringBuilder.append(" ");
+            }
         }
 
-        if (sb.length() >= 1) {
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        System.out.println(sb);
+        System.out.println(stringBuilder);
     }
 
     /**

@@ -1,3 +1,4 @@
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
@@ -8,15 +9,16 @@ public class LinkedListDeque<Item> extends LinkedList<Item> implements Deque<Ite
 
     @Override
     public void printDeque() {
-        StringBuilder sb = new StringBuilder();
-        for (Item item : this) {
-            sb.append(item).append(" ");
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (Iterator<Item> iterator = iterator(); iterator.hasNext();) {
+            stringBuilder.append(iterator.next());
+            if (iterator.hasNext()) {
+                stringBuilder.append(" ");
+            }
         }
 
-        if (sb.length() >= 1) {
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        System.out.println(sb);
+        System.out.println(stringBuilder);
     }
 
     public Item getRecursive(int i) {

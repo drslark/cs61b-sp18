@@ -152,15 +152,16 @@ public class ArrayDeque<T> {
      * Print the items in the deque from first to last.
      */
     public void printDeque() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder stringBuilder = new StringBuilder();
+
         for (int i = 0; i < size; i++) {
-            sb.append(items[getActualIndex(i)]).append(" ");
+            stringBuilder.append(items[getActualIndex(i)]);
+            if (i < size - 1) {
+                stringBuilder.append(" ");
+            }
         }
 
-        if (sb.length() >= 1) {
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        System.out.println(sb);
+        System.out.println(stringBuilder);
     }
 
     /**

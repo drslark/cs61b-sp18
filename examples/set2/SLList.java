@@ -1,8 +1,10 @@
+import java.util.Iterator;
+
 /**
  * An SLList is a list of integers, which hides the terrible truth
  * of the nakedness within.
  */
-public class SLList<GloopGlop> implements LastAdder<GloopGlop>, List61B<GloopGlop> {
+public class SLList<GloopGlop> implements LastAdder<GloopGlop>, List61B<GloopGlop>, Iterable<GloopGlop> {
 
     private static class StuffNode<BleepBlorp> {
         public BleepBlorp item;
@@ -294,6 +296,34 @@ public class SLList<GloopGlop> implements LastAdder<GloopGlop>, List61B<GloopGlo
         System.out.println();
     }
 
+    /** Returns an iterator into me. */
+    @Override
+    public Iterator<GloopGlop> iterator() {
+        return new SLListIterator<>(sentinel);
+    }
+
+    private static class SLListIterator<BleepBlorp> implements Iterator<BleepBlorp> {
+
+        private StuffNode<BleepBlorp> currNode;
+
+        public SLListIterator(StuffNode<BleepBlorp> sentinel) {
+            currNode = sentinel.next;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return currNode != null;
+        }
+
+        @Override
+        public BleepBlorp next() {
+            BleepBlorp item = currNode.item;
+            currNode = currNode.next;
+            return item;
+        }
+
+    }
+
     public static void main(String[] args) {
         /* Creates an empty list. */
         SLList<Integer> L = new SLList<>();
@@ -337,5 +367,8 @@ public class SLList<GloopGlop> implements LastAdder<GloopGlop>, List61B<GloopGlo
         L.display();
         L.reverseSaveMemoryWithoutReset();
         L.display();
+        for (int item : L) {
+            System.out.println(item);
+        }
     }
 }

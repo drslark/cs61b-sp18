@@ -9,6 +9,7 @@ Data Structures (UC Berkeley, Spring 2018)
 - [x] set3
 - [x] set4
 - [x] set5
+- [x] set6
 
 # progress of doing
 
