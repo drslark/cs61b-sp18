@@ -23,3 +23,4 @@ Data Structures (UC Berkeley, Spring 2018)
 - [x] lab4
 - [x] proj1gold
 - [x] lab5
+- [x] hw1
