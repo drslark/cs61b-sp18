@@ -1,4 +1,7 @@
 package byog.lab5;
+
+import java.util.Random;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -6,7 +9,9 @@ import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
 
-import java.util.Random;
+import byog.lab5.graphics.Hexagon;
+import byog.lab5.graphics.Position;
+
 
 /**
  * Draws a world consisting of hexagonal regions.
@@ -23,46 +28,46 @@ public class HexWorld {
      * @param position The x-coordinate and y-coordinate of a hexagon.
      */
     private static void validateLocation(Hexagon hexagon, Position position) {
-        if (hexagon.size <= 1) {
+        if (hexagon.getSize() <= 1) {
             throw new RuntimeException(
-                    String.format("Hexagon size should be greater than 1, got %d!", hexagon.size)
+                String.format("Hexagon size should be greater than 1, got %d!", hexagon.getSize())
             );
         }
 
-        if (position.x < 0) {
+        if (position.getX() < 0) {
             throw new RuntimeException(
                     String.format(
                             "Hexagon's leftmost should be greater than 0, got %d!",
-                            position.x
+                            position.getX()
                     )
             );
         }
 
-        if (position.x + hexagon.width - 1 >= WIDTH) {
+        if (position.getX() + hexagon.getWidth() - 1 >= WIDTH) {
             throw new RuntimeException(
                     String.format(
                             "Hexagon's rightmost should be less than %d, got %d!",
                             WIDTH,
-                            position.x + hexagon.width - 1
+                            position.getX() + hexagon.getWidth() - 1
                     )
             );
         }
 
-        if (position.y + hexagon.height - 1 >= HEIGHT) {
+        if (position.getY() + hexagon.getHeight() - 1 >= HEIGHT) {
             throw new RuntimeException(
                     String.format(
                             "Hexagon's upmost should be less than %d, got %d!",
                             HEIGHT,
-                            position.y + hexagon.height - 1
+                            position.getY() + hexagon.getHeight() - 1
                     )
             );
         }
 
-        if (position.y < 0) {
+        if (position.getY() < 0) {
             throw new RuntimeException(
                     String.format(
                             "Hexagon's bottommost should be greater than 0, got %d!",
-                            position.y
+                            position.getY()
                     )
             );
         }
@@ -89,34 +94,36 @@ public class HexWorld {
     private static void fillHexagon(
             TETile[][] tiles, Hexagon hexagon, Position position, TETile tile, Random random
     ) {
-        for (int i = 0; i < hexagon.width; i++) {
+        for (int i = 0; i < hexagon.getWidth(); i++) {
             Hexagon.Bounds yBound = hexagon.getColumnBounds(i);
-            for (int j = yBound.lower; j < yBound.upper; j++) {
+            for (int j = yBound.getLower(); j < yBound.getUpper(); j++) {
                 TETile tileToFill =
                         random == null ? tile : TETile.colorVariant(tile, 50, 50, 50, random);
-                tiles[position.x + i][position.y + j] = tileToFill;
+                tiles[position.getX() + i][position.getY() + j] = tileToFill;
             }
         }
     }
 
     private static Position[] generateHexagonOffsets(int hexagonSize) {
         Hexagon hexagon = new Hexagon(hexagonSize);
-        int width = hexagon.width;
-        int height = hexagon.height;
+        int width = hexagon.getWidth();
+        int height = hexagon.getHeight();
 
-        int[] nums = {3, 4, 5, 4, 3};
+        int[] hexagons = {3, 4, 5, 4, 3};
         Position startPosition = new Position(0, 2 * hexagonSize);
 
         Position[] hexagonOffsets = new Position[19];
 
         int index = 0;
-        for (int i = 0; i < nums.length; i++) {
-            for (int j = 0; j < nums[i]; j++) {
-                hexagonOffsets[index] = new Position(startPosition.x, startPosition.y + j * height);
+        for (int i = 0; i < hexagons.length; i++) {
+            for (int j = 0; j < hexagons[i]; j++) {
+                hexagonOffsets[index] = new Position(
+                    startPosition.getX(), startPosition.getY() + j * height
+                );
                 index++;
             }
 
-            if (i < nums.length / 2) {
+            if (i < hexagons.length / 2) {
                 startPosition = startPosition.add(hexagon.bottomRightOffset());
             } else {
                 startPosition = startPosition.add(hexagon.topRightOffset());
@@ -131,7 +138,7 @@ public class HexWorld {
      * @param random A random number generator.
      * @return A random tile.
      */
-    private static TETile generateRandomtile(Random random) {
+    private static TETile generateRandomTile(Random random) {
         random = random == null ? new Random() : random;
         int tileNum = random.nextInt(7);
         switch (tileNum) {
@@ -152,7 +159,7 @@ public class HexWorld {
      * @param tiles The tiles to fill.
      * @param hexagon Information about a hexagon.
      * @param position The position of a hexagon.
-     * @param tile The tile of a hexgon.
+     * @param tile The tile of a hexagon.
      * @param random A random number generator.
      */
     public static void addHexagon(
@@ -173,9 +180,9 @@ public class HexWorld {
     public static void addHexagons(
             TETile[][] tiles, Hexagon hexagon, Position startPosition, Random random
     ) {
-        Position[] hexagonOffsets = generateHexagonOffsets(hexagon.size);
+        Position[] hexagonOffsets = generateHexagonOffsets(hexagon.getSize());
         for (Position hexagonOffset : hexagonOffsets) {
-            TETile randomTile = generateRandomtile(random);
+            TETile randomTile = generateRandomTile(random);
             addHexagon(tiles, hexagon, startPosition.add(hexagonOffset), randomTile, random);
         }
     }
@@ -187,20 +194,20 @@ public class HexWorld {
         Hexagon hexagonSizeThree = new Hexagon(3);
 
         columnBounds = hexagonSizeThree.getColumnBounds(0);
-        assertEquals(2, columnBounds.upper - columnBounds.lower);
+        assertEquals(2, columnBounds.getUpper() - columnBounds.getLower());
         columnBounds = hexagonSizeThree.getColumnBounds(2);
-        assertEquals(6, columnBounds.upper - columnBounds.lower);
+        assertEquals(6, columnBounds.getUpper() - columnBounds.getLower());
         columnBounds = hexagonSizeThree.getColumnBounds(3);
-        assertEquals(6, columnBounds.upper - columnBounds.lower);
+        assertEquals(6, columnBounds.getUpper() - columnBounds.getLower());
 
         Hexagon hexagonSizeFour = new Hexagon(4);
 
         columnBounds = hexagonSizeFour.getColumnBounds(5);
-        assertEquals(8, columnBounds.upper - columnBounds.lower);
+        assertEquals(8, columnBounds.getUpper() - columnBounds.getLower());
         columnBounds = hexagonSizeFour.getColumnBounds(7);
-        assertEquals(6, columnBounds.upper - columnBounds.lower);
+        assertEquals(6, columnBounds.getUpper() - columnBounds.getLower());
         columnBounds = hexagonSizeFour.getColumnBounds(8);
-        assertEquals(4, columnBounds.upper - columnBounds.lower);
+        assertEquals(4, columnBounds.getUpper() - columnBounds.getLower());
     }
 
     @Test
@@ -210,20 +217,20 @@ public class HexWorld {
         Hexagon hexagonSizeThree = new Hexagon(3);
 
         rowBounds = hexagonSizeThree.getRowBounds(0);
-        assertEquals(3, rowBounds.upper - rowBounds.lower);
+        assertEquals(3, rowBounds.getUpper() - rowBounds.getLower());
         rowBounds = hexagonSizeThree.getRowBounds(1);
-        assertEquals(5, rowBounds.upper - rowBounds.lower);
+        assertEquals(5, rowBounds.getUpper() - rowBounds.getLower());
         rowBounds = hexagonSizeThree.getRowBounds(2);
-        assertEquals(7, rowBounds.upper - rowBounds.lower);
+        assertEquals(7, rowBounds.getUpper() - rowBounds.getLower());
 
         Hexagon hexagonSizeFour = new Hexagon(4);
 
         rowBounds = hexagonSizeFour.getRowBounds(4);
-        assertEquals(10, rowBounds.upper - rowBounds.lower);
+        assertEquals(10, rowBounds.getUpper() - rowBounds.getLower());
         rowBounds = hexagonSizeFour.getRowBounds(6);
-        assertEquals(6, rowBounds.upper - rowBounds.lower);
+        assertEquals(6, rowBounds.getUpper() - rowBounds.getLower());
         rowBounds = hexagonSizeFour.getRowBounds(7);
-        assertEquals(4, rowBounds.upper - rowBounds.lower);
+        assertEquals(4, rowBounds.getUpper() - rowBounds.getLower());
     }
 
     @Test
