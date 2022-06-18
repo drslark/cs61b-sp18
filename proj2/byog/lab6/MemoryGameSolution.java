@@ -117,6 +117,7 @@ public class MemoryGameSolution {
         if (!gameOver) {
             Font smallFont = new Font("Monaco", Font.BOLD, 20);
             StdDraw.setFont(smallFont);
+            StdDraw.setPenColor(Color.white);
             StdDraw.textLeft(1, height - 1, "Round: " + round);
             StdDraw.text(midWidth, height - 1, playerTurn ? "Type!" : "Watch!");
             StdDraw.textRight(width - 1, height - 1, ENCOURAGEMENT[round % ENCOURAGEMENT.length]);

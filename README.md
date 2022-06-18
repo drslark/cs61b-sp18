@@ -12,7 +12,7 @@ Data Structures (UC Berkeley, Spring 2018)
 - [x] set6
 - [x] set7
 
-# progress of doing
+# progress of practicing
 
 - [x] lab1
 - [x] proj0
@@ -25,3 +25,4 @@ Data Structures (UC Berkeley, Spring 2018)
 - [x] lab5
 - [x] hw1
 - [x] proj2phase1
+- [x] lab6
