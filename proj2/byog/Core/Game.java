@@ -1,5 +1,17 @@
 package byog.Core;
 
+import java.util.Collection;
+import java.util.Random;
+
+import byog.Core.input.ActionParser;
+import byog.Core.terrain.Canvas;
+import byog.Core.terrain.Door;
+import byog.Core.terrain.Doors;
+import byog.Core.terrain.Hallway;
+import byog.Core.terrain.Hallways;
+import byog.Core.terrain.Room;
+import byog.Core.terrain.Rooms;
+import byog.Core.tile.Filler;
 import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 
@@ -8,6 +20,13 @@ public class Game {
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
     public static final int HEIGHT = 30;
+
+    /**
+     * Returns the game's te-renderer.
+     */
+    public TERenderer getTERenderer() {
+        return ter;
+    }
 
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
@@ -28,11 +47,21 @@ public class Game {
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] playWithInputString(String input) {
-        // TODO: Fill out this method to run the game using the input passed in,
-        // and return a 2D tile representation of the world that would have been
-        // drawn if the same inputs had been given to playWithKeyboard().
+        ActionParser actionParser = new ActionParser(input);
+        Random random = new Random(actionParser.getSeed());
 
-        TETile[][] finalWorldFrame = null;
+        Canvas canvas = new Canvas(WIDTH, HEIGHT);
+        TETile[][] finalWorldFrame = new TETile[canvas.getWidth()][canvas.getHeight()];
+
+        Collection<Room> rooms = Rooms.generateRandomRooms(canvas, 50, random);
+        Collection<Hallway> hallways = Hallways.generateHallways(canvas, rooms, random);
+        Door door = Doors.generateRandomDoor(rooms, hallways, random);
+
+        Filler.fillBackGround(finalWorldFrame);
+        Filler.fillRooms(finalWorldFrame, rooms);
+        Filler.fillHallways(finalWorldFrame, hallways);
+        Filler.fillDoor(finalWorldFrame, door);
+
         return finalWorldFrame;
     }
 }
