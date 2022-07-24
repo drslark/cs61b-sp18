@@ -12,6 +12,7 @@ Data Structures (UC Berkeley, Spring 2018)
 - [x] set6
 - [x] set7
 - [x] set8
+- [x] set9
 
 # progress of practicing
 
