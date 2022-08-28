@@ -33,3 +33,4 @@ Data Structures (UC Berkeley, Spring 2018)
 - [x] lab6
 - [x] proj2phase2
 - [x] hw2
+- [x] lab9
