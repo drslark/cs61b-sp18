@@ -40,3 +40,4 @@ Data Structures (UC Berkeley, Spring 2018)
 - [x] hw2
 - [x] lab9
 - [x] hw3
+- [x] lab10
