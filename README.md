@@ -23,6 +23,7 @@ Data Structures (UC Berkeley, Spring 2018)
 - [x] set17
 - [x] set18
 - [x] set19
+- [x] set20
 
 # progress of practicing
 
