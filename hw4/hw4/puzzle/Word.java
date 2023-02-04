@@ -1,23 +1,28 @@
 package hw4.puzzle;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
 import edu.princeton.cs.introcs.In;
 
 public class Word implements WorldState {
+
     private static Set<String> words;
-    private static final String WORDFILE = "input/words10000.txt";
+    private static final String WORD_FILE = "input/words10000.txt";
+    private static final Map<String, Map<String, Integer>> CACHED_DISTANCE = new HashMap<>();
+
     private final String word;
     private final String goal;
 
     /**
-     * Reads the wordfile specified by the wordfile variable.
+     * Reads the word-file specified by the WORD_FILE variable.
      */
     private void readWords() {
         words = new HashSet<String>();
 
-        In in = new In(WORDFILE);
+        In in = new In(WORD_FILE);
         while (!in.isEmpty()) {
             words.add(in.readString());
         }
@@ -49,6 +54,14 @@ public class Word implements WorldState {
      * https://rosettacode.org/wiki/Levenshtein_distance.
      */
     private static int editDistance(String a, String b) {
+        if (CACHED_DISTANCE.get(a) != null && CACHED_DISTANCE.get(a).get(b) != null) {
+            return CACHED_DISTANCE.get(a).get(b);
+        }
+
+        if (CACHED_DISTANCE.get(b) != null && CACHED_DISTANCE.get(b).get(a) != null) {
+            return CACHED_DISTANCE.get(b).get(a);
+        }
+
         a = a.toLowerCase();
         b = b.toLowerCase();
         // i == 0
@@ -67,19 +80,46 @@ public class Word implements WorldState {
                 costs[j] = cj;
             }
         }
-        return costs[b.length()];
+
+        CACHED_DISTANCE.putIfAbsent(a, new HashMap<>());
+        CACHED_DISTANCE.get(a).put(b, costs[b.length()]);
+        return CACHED_DISTANCE.get(a).get(b);
     }
 
 
     @Override
     public Iterable<WorldState> neighbors() {
-        Set<WorldState> neighbs = new HashSet<>();
-        for (String s : words) {
-            if (editDistance(this.word, s) == 1) {
-                neighbs.add(new Word(s, goal));
+        Set<WorldState> neighbourWords = new HashSet<>();
+
+        String neighbourWord;
+        for (int i = 0; i < word.length(); i++) {
+            neighbourWord = word.substring(0, i) + word.substring(i + 1);
+            if (words.contains(neighbourWord)) {
+                neighbourWords.add(new Word(neighbourWord, goal));
+            }
+
+            for (char c = 'a'; c <= 'z'; c++) {
+                if (word.charAt(i) == c) {
+                    continue;
+                }
+
+                neighbourWord = word.substring(0, i) + c + word.substring(i + 1);
+                if (words.contains(neighbourWord)) {
+                    neighbourWords.add(new Word(neighbourWord, goal));
+                }
             }
         }
-        return neighbs;
+
+        for (int i = 0; i <= word.length(); i++) {
+            for (char c = 'a'; c <= 'z'; c++) {
+                neighbourWord = word.substring(0, i) + c + word.substring(i);
+                if (words.contains(neighbourWord)) {
+                    neighbourWords.add(new Word(neighbourWord, goal));
+                }
+            }
+        }
+
+        return neighbourWords;
     }
 
     @Override
@@ -101,12 +141,12 @@ public class Word implements WorldState {
             return false;
         }
 
-        Word word1 = (Word) o;
+        Word oWorld = (Word) o;
 
-        if (word != null ? !word.equals(word1.word) : word1.word != null) {
+        if (word != null ? !word.equals(oWorld.word) : oWorld.word != null) {
             return false;
         }
-        return goal != null ? goal.equals(word1.goal) : word1.goal == null;
+        return goal != null ? goal.equals(oWorld.goal) : oWorld.goal == null;
     }
 
     @Override
