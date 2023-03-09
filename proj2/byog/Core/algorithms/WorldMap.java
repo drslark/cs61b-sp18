@@ -1,29 +1,28 @@
 package byog.Core.algorithms;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import byog.Core.coordinates.Location2D;
+import byog.Core.coordinate.Location;
 
 /**
  * The world map is used to manage locations in AStar.
  */
-class WorldMap {
+class WorldMap<E extends Location<E>> {
 
-    private final int[][] map;
+    private final Set<E> locations;
 
-    private final Map<Location2D, Map<Location2D, Integer>> cachedDistance;
+    private final Map<E, Map<E, Integer>> cachedDistance;
 
     /**
-     * Constructor with a 2-d int array.
+     * Constructor with a set of locations.
      *
-     * @param map A 2-d int array.
+     * @param locations A set of locations.
      */
-    WorldMap(int[][] map) {
-        this.map = map;
+    WorldMap(Set<E> locations) {
+        this.locations = locations;
         this.cachedDistance = new HashMap<>();
     }
 
@@ -32,12 +31,12 @@ class WorldMap {
      *
      * @return All locations of the neighbours.
      */
-    Set<Location2D> getNeighbours(Location2D location) {
-        Set<Location2D> neighbours = new HashSet<>();
-        Collection<Location2D> closeNeighbours = location.getCloseNeighbours(1);
+    Set<E> getNeighbours(E location) {
+        Set<E> neighbours = new HashSet<>();
+        Set<E> closeNeighbours = location.getCloseNeighbours();
 
-        for (Location2D neighbour : closeNeighbours) {
-            if (isInMap(neighbour) && isPassable(neighbour)) {
+        for (E neighbour : closeNeighbours) {
+            if (isPassable(location)) {
                 neighbours.add(neighbour);
             }
         }
@@ -52,12 +51,12 @@ class WorldMap {
      * @param thatLocation The other location.
      * @return The manhattan distance.
      */
-    int manhattanDistance(Location2D thisLocation, Location2D thatLocation) {
+    int manhattanDistance(E thisLocation, E thatLocation) {
         if (!cachedDistance.containsKey(thisLocation)
             || !cachedDistance.get(thisLocation).containsKey(thatLocation)) {
             cachedDistance.putIfAbsent(thisLocation, new HashMap<>());
             cachedDistance.get(thisLocation).put(
-                thatLocation, Location2D.manhattanDistance(thisLocation, thatLocation)
+                thatLocation, thisLocation.manhattanDistance(thatLocation)
             );
         }
 
@@ -70,26 +69,8 @@ class WorldMap {
      * @param location The given location.
      * @return If one location is passable.
      */
-    boolean isPassable(Location2D location) {
-        return map[location.getX()][location.getY()] == 0;
-    }
-
-    /**
-     * To judge if some location is in the world map.
-     *
-     * @param location The given location.
-     * @return If one location is in the world map.
-     */
-    boolean isInMap(Location2D location) {
-        if (location.getX() < 0 || location.getX() >= map.length) {
-            return false;
-        }
-
-        if (location.getY() < 0 || location.getY() >= map[0].length) {
-            return false;
-        }
-
-        return true;
+    boolean isPassable(E location) {
+        return locations.contains(location);
     }
 
 }

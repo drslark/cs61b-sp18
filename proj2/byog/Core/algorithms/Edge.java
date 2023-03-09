@@ -15,6 +15,7 @@ public class Edge implements Comparable<Edge> {
 
     /**
      * Constructor with vertexes and weight.
+     *
      * @param w Some vertex.
      * @param v The other vertex.
      * @param weight The weight.
@@ -35,6 +36,7 @@ public class Edge implements Comparable<Edge> {
 
     /**
      * Gets vertex v.
+     *
      * @return Vertex v.
      */
     public int getV() {
@@ -43,6 +45,7 @@ public class Edge implements Comparable<Edge> {
 
     /**
      * Gets vertex w.
+     *
      * @return Vertex w.
      */
     public int getW() {
@@ -50,8 +53,9 @@ public class Edge implements Comparable<Edge> {
     }
 
     /**
-     * Gets some vertex.
-     * @return Some vertex.
+     * Gets one vertex.
+     *
+     * @return One vertex.
      */
     public int either() {
         return v;
@@ -59,6 +63,7 @@ public class Edge implements Comparable<Edge> {
 
     /**
      * Gets the other vertex.
+     *
      * @return The other vertex.
      */
     public int other() {
@@ -67,6 +72,7 @@ public class Edge implements Comparable<Edge> {
 
     /**
      * Gets the other vertex out of the given one.
+     *
      * @param vertex The given vertex.
      * @return The other vertex.
      */
@@ -83,25 +89,25 @@ public class Edge implements Comparable<Edge> {
     }
 
     @Override
-    public int compareTo(Edge other) {
-        return Double.compare(weight, other.weight);
+    public int compareTo(Edge that) {
+        return Double.compare(weight, that.weight);
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object that) {
+        if (this == that) {
             return true;
         }
 
-        if (!(other instanceof Edge)) {
+        if (!(that instanceof Edge)) {
             return false;
         }
 
-        Edge otherEdge = (Edge) other;
+        Edge thatEdge = (Edge) that;
 
-        return w == otherEdge.w
-            && v == otherEdge.v
-            && weight == otherEdge.weight;
+        return w == thatEdge.w
+            && v == thatEdge.v
+            && weight == thatEdge.weight;
     }
 
     @Override

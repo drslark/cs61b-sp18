@@ -27,3 +27,4 @@ Data Structures (UC Berkeley, Spring 2018)
 - [x] hw1
 - [x] proj2phase1
 - [x] lab6
+- [x] proj2phase2

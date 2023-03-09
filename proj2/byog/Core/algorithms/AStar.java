@@ -5,27 +5,28 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
-import byog.Core.coordinates.Location2D;
+import byog.Core.coordinate.Location;
 
 /**
  * The AStar algorithm to find the shortest path.
  */
-public class AStar {
+public class AStar<E extends Location<E>> {
 
     private final Random random;
 
-    private final WorldMap worldMap;
+    private final WorldMap<E> worldMap;
 
     /**
-     * Constructor with a 2-d int array and a pseudorandom generator.
+     * Constructor with a set of passableLocations and a pseudorandom generator.
      *
-     * @param map A 2-d int array.
+     * @param passableLocations A set of passableLocations.
      * @param random A pseudorandom generator.
      */
-    public AStar(int[][] map, Random random) {
+    public AStar(Set<E> passableLocations, Random random) {
         this.random = random;
-        this.worldMap = new WorldMap(map);
+        this.worldMap = new WorldMap<>(passableLocations);
     }
 
     /**
@@ -35,11 +36,11 @@ public class AStar {
      * @param end The end location.
      * @return The path found by AStar.
      */
-    public Deque<Location2D> connect(Location2D start, Location2D end) {
-        HashMap<Location2D, Integer> distTo = new HashMap<>();
-        HashMap<Location2D, Location2D> parentOf = new HashMap<>();
+    public Deque<E> connect(E start, E end) {
+        HashMap<E, Integer> distTo = new HashMap<>();
+        HashMap<E, E> parentOf = new HashMap<>();
 
-        RandomDoubleMapPQ<Location2D, Integer> toSearch = new RandomDoubleMapPQ<>(random);
+        RandomDoubleMapPQ<E, Integer> toSearch = new RandomDoubleMapPQ<>(random);
 
         distTo.put(start, 0);
         parentOf.put(start, null);
@@ -47,12 +48,12 @@ public class AStar {
 
         while (toSearch.size() > 0) {
             // travel a grid
-            Location2D location = toSearch.removeRandomSmallest();
+            E location = toSearch.removeRandomSmallest();
             if (location.equals(end)) {
                 break;
             }
             // add closer neighbours of the grid
-            for (Location2D neighbour : worldMap.getNeighbours(location)) {
+            for (E neighbour : worldMap.getNeighbours(location)) {
                 // check if a neighbour to search is closer to start
                 if (distTo.getOrDefault(neighbour, Integer.MAX_VALUE) <= distTo.get(location) + 1) {
                     continue;
@@ -70,8 +71,8 @@ public class AStar {
         return getPath(end, parentOf);
     }
 
-    private Deque<Location2D> getPath(Location2D end, Map<Location2D, Location2D> parentOf) {
-        Deque<Location2D> path = new ArrayDeque<>();
+    private Deque<E> getPath(E end, Map<E, E> parentOf) {
+        Deque<E> path = new ArrayDeque<>();
         for (; end != null; end = parentOf.get(end)) {
             path.addFirst(end);
         }

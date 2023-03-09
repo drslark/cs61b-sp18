@@ -16,6 +16,7 @@ public class Prim {
 
     /**
      * Constructor with a graph in the form of adjacency list.
+     *
      * @param graph A graph in the form of adjacency list.
      */
     public Prim(AdjacencyListGraph graph) {
@@ -34,6 +35,7 @@ public class Prim {
 
     /**
      * Gets the edges in order.
+     *
      * @return The edges in order.
      */
     public List<Edge> sortedEdges() {

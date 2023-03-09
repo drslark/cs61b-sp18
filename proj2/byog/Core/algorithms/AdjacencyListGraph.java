@@ -1,6 +1,5 @@
 package byog.Core.algorithms;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,6 +15,7 @@ public class AdjacencyListGraph {
 
     /**
      * Constructor with a graph in the form of adjacency matrix.
+     *
      * @param adjacencyMatrixGraph A graph in the form of adjacency matrix.
      */
     public AdjacencyListGraph(int[][] adjacencyMatrixGraph) {
@@ -38,6 +38,7 @@ public class AdjacencyListGraph {
 
     /**
      * Gets the number of vertexes.
+     *
      * @return The number of vertexes.
      */
     public int V() {
@@ -46,6 +47,7 @@ public class AdjacencyListGraph {
 
     /**
      * Gets the number of edges.
+     *
      * @return The number of edges.
      */
     public int E() {
@@ -54,10 +56,11 @@ public class AdjacencyListGraph {
 
     /**
      * Gets the edges which are adjacent to the given vertex.
+     *
      * @param vertex A given vertex.
-     * @return A collection of edges which are adjacent to the given vertex.
+     * @return A list of edges which are adjacent to the given vertex.
      */
-    public Collection<Edge> adjacent(int vertex) {
+    public List<Edge> adjacent(int vertex) {
         return new LinkedList<>(edges[vertex]);
     }
 

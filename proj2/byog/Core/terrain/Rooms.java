@@ -1,12 +1,14 @@
 package byog.Core.terrain;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import byog.Core.context.Context;
+import byog.Core.coordinate.Location;
+import byog.Core.terrain.concrete.RectangularRoom;
+import byog.Core.terrain.view.Room;
 
 import static byog.Core.RandomUtils.uniform;
-import byog.Core.coordinates.Location2D;
 
 /**
  * Room management.
@@ -14,20 +16,17 @@ import byog.Core.coordinates.Location2D;
 public class Rooms {
 
     /**
-     * Generates some random rooms with regard of a canvas.
+     * Generates a set of random rooms.
      *
-     * @param canvas The canvas of the dungeon.
      * @param numRooms The desired number of random rooms.
-     * @param random A pseudorandom generator.
-     * @return Some random rooms.
+     * @return A set of random rooms.
      */
-    public static Collection<Room> generateRandomRooms(Canvas canvas, int numRooms, Random random) {
-
-        List<Room> rooms = new ArrayList<>();
+    public static <E extends Location<E>> LinkedHashSet<Room<E>> generateRandomRooms(int numRooms) {
+        LinkedHashSet<Room<E>> rooms = new LinkedHashSet<>();
 
         // generate random rooms
         for (int i = 0; i < numRooms; i++) {
-            Room room = Rooms.generateRandomRoom(canvas, random);
+            Room<E> room = Rooms.generateRandomRoom();
             if (!Rooms.isOverlap(room, rooms)) {
                 rooms.add(room);
             }
@@ -36,50 +35,73 @@ public class Rooms {
         return rooms;
     }
 
-    private static Room generateRandomRoom(Canvas canvas, Random random) {
-        if (canvas.getWidth() < 10 || canvas.getHeight() < 10) {
-            throw new RuntimeException(
-                "The width and height of the canvas must be larger than 10!"
-            );
+    /**
+     * Whether one room is overlap with all existed rooms.
+     *
+     * @param room One room.
+     * @param existedRooms Existed rooms.
+     * @return Whether one room is overlap with all existed rooms.
+     */
+    public static <E extends Location<E>> boolean isOverlap(
+        Room<E> room, Set<Room<E>> existedRooms
+    ) {
+        for (Room<E> existedRoom : existedRooms) {
+            if (room.isOverlap(existedRoom)) {
+                return true;
+            }
         }
 
-        int baseLimitInWidth = canvas.getWidth() / 5;
-        int lowerBoundInWidth = 1;
-        int upperBoundInWidth = canvas.getWidth() - 1;
+        return false;
+    }
 
-        int[] xAnchorCenterWidth = new int[3];
-        generateRandomAnchorCenterExtent(
-            xAnchorCenterWidth, baseLimitInWidth, lowerBoundInWidth, upperBoundInWidth, random
-        );
+    private static <E extends Location<E>> Room<E> generateRandomRoom() {
+        int[] shape = Context.shape();
+        for (int i = 0; i < shape.length; i++) {
+            if (shape[i] < 10) {
+                throw new RuntimeException(
+                    "Any size of the canvas shape must be larger than 10!"
+                );
+            }
+        }
 
-        int baseLimitInHeight = canvas.getHeight() / 5;
-        int lowerBoundInHeight = 1;
-        int upperBoundInHeight = canvas.getHeight() - 1;
+        int[] roomAnchor = new int[shape.length];
+        int[] roomCenter = new int[shape.length];
+        int[] roomShape = new int[shape.length];
 
-        int[] yAnchorCenterWidth = new int[3];
-        generateRandomAnchorCenterExtent(
-            yAnchorCenterWidth, baseLimitInHeight, lowerBoundInHeight, upperBoundInHeight, random
-        );
+        for (int i = 0; i < shape.length; i++) {
+            int sizeLimit = shape[i] / 5;
+            int lowerBound = 1;
+            int upperBound = shape[i] - 1;
 
-        return new Room(
-            new Location2D(xAnchorCenterWidth[0], yAnchorCenterWidth[0]),
-            new Location2D(xAnchorCenterWidth[1], yAnchorCenterWidth[1]),
-            xAnchorCenterWidth[2], yAnchorCenterWidth[2]
+            int[] anchorCenterSize = new int[3];
+            generateRandomAnchorCenterExtent(
+                anchorCenterSize, sizeLimit, lowerBound, upperBound
+            );
+
+            roomAnchor[i] = anchorCenterSize[0];
+            roomCenter[i] = anchorCenterSize[1];
+            roomShape[i] = anchorCenterSize[2];
+        }
+
+        return new RectangularRoom<>(
+            (E) Context.get(roomAnchor),
+            (E) Context.get(roomCenter),
+            roomShape
         );
     }
 
     private static void generateRandomAnchorCenterExtent(
-        int[] anchorCenterExtent, int baseLimit, int lowerBound, int upperBound, Random random
+        int[] anchorCenterExtent, int baseLimit, int lowerBound, int upperBound
     ) {
         baseLimit = Math.max(baseLimit % 2 == 0 ? baseLimit : baseLimit - 1, 1);
-        int center = uniform(random, lowerBound, upperBound);
+        int center = uniform(Context.random(), lowerBound, upperBound);
 
-        if (random.nextDouble() < 0.5) {
+        if (Context.random().nextDouble() < 0.5) {
             // odd case
             int halfLimitInWidth = Math.min(center - lowerBound + 1, upperBound - center);
             halfLimitInWidth = Math.min(halfLimitInWidth, baseLimit / 2);
 
-            int halfWidth = uniform(random, 0, halfLimitInWidth);
+            int halfWidth = uniform(Context.random(), 0, halfLimitInWidth);
             int anchor = center - halfWidth;
             int extent = 2 * halfWidth + 1;
 
@@ -93,7 +115,7 @@ public class Rooms {
             int halfLimitInWidth = Math.min(leftLimitInWidth, rightLimitInWidth);
             halfLimitInWidth = Math.min(halfLimitInWidth, baseLimit / 2);
 
-            int halfWidth = uniform(random, 0, halfLimitInWidth);
+            int halfWidth = uniform(Context.random(), 0, halfLimitInWidth);
             int extent = halfWidth * 2 + 2;
             int anchor = leftLimitInWidth < rightLimitInWidth
                 ? center - halfWidth
@@ -103,73 +125,6 @@ public class Rooms {
             anchorCenterExtent[1] = center;
             anchorCenterExtent[2] = extent;
         }
-    }
-
-    /**
-     * Whether one room is overlap with another.
-     *
-     * @param thisRoom One room.
-     * @param thatRoom another room.
-     * @return Whether one room is overlap with another.
-     */
-    public static boolean isOverlap(Room thisRoom, Room thatRoom) {
-        boolean isXOverlap = !(
-            thisRoom.getAnchorX() >= thatRoom.getAnchorX() + thatRoom.getWidth()
-                || thisRoom.getAnchorX() + thisRoom.getWidth() <= thatRoom.getAnchorX()
-        );
-
-        boolean isYOverlap = !(
-            thisRoom.getAnchorY() >= thatRoom.getAnchorY() + thatRoom.getHeight()
-                || thisRoom.getAnchorY() + thisRoom.getHeight() <= thatRoom.getAnchorY()
-        );
-
-        return isXOverlap && isYOverlap;
-    }
-
-    /**
-     * Whether one room is overlap with some existed rooms.
-     *
-     * @param room One room.
-     * @param existedRooms Other rooms.
-     * @return Whether one room is overlap with some existed rooms.
-     */
-    public static boolean isOverlap(Room room, Collection<Room> existedRooms) {
-        for (Room existedRoom : existedRooms) {
-            if (isOverlap(room, existedRoom)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Whether one room is margin with another.
-     *
-     * @param thisRoom One room.
-     * @param thatRoom another room.
-     * @return Whether one room is margin with another.
-     */
-    public static boolean isMargin(Room thisRoom, Room thatRoom) {
-        boolean isXOverlap = !(
-            thisRoom.getAnchorX() >= thatRoom.getAnchorX() + thatRoom.getWidth()
-                || thisRoom.getAnchorX() + thisRoom.getWidth() <= thatRoom.getAnchorX()
-        );
-
-        boolean isXMargin =
-            thisRoom.getAnchorX() == thatRoom.getAnchorX() + thatRoom.getWidth()
-                || thisRoom.getAnchorX() + thisRoom.getWidth() == thatRoom.getAnchorX();
-
-        boolean isYOverlap = !(
-            thisRoom.getAnchorY() >= thatRoom.getAnchorY() + thatRoom.getHeight()
-                || thisRoom.getAnchorY() + thisRoom.getHeight() <= thatRoom.getAnchorY()
-        );
-
-        boolean isYMargin =
-            thisRoom.getAnchorY() == thatRoom.getAnchorY() + thatRoom.getHeight()
-                || thisRoom.getAnchorY() + thisRoom.getHeight() == thatRoom.getAnchorY();
-
-        return (isXMargin && isYOverlap) || (isYMargin && isXOverlap);
     }
 
 }

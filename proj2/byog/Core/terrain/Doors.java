@@ -1,13 +1,16 @@
 package byog.Core.terrain;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Random;
-import java.util.Set;
 
-import byog.Core.coordinates.Location2D;
+import byog.Core.context.Context;
+import byog.Core.coordinate.Location;
+import byog.Core.terrain.concrete.SmallDoor;
+import byog.Core.terrain.view.Door;
+import byog.Core.terrain.view.Hallway;
+import byog.Core.terrain.view.Room;
+import byog.Core.terrain.view.Terrain;
 
 /**
  * Door management.
@@ -15,44 +18,68 @@ import byog.Core.coordinates.Location2D;
 public class Doors {
 
     /**
-     * Generates a random door with regard of a collection of rooms and hallways.
+     * Generates a random door with regard of a set of rooms and hallways.
      *
-     * @param rooms A collection of rooms.
-     * @param hallways A collection of hallways.
-     * @param random A pseudorandom generator.
-     * @return Generated door.
+     * @param rooms A set of rooms.
+     * @param hallways A set of hallways.
+     * @return The generated door.
      */
-    public static Door generateRandomDoor(
-            Collection<Room> rooms, Collection<Hallway> hallways, Random random
+    public static <E extends Location<E>> Door<E> generateRandomDoor(
+        LinkedHashSet<Room<E>> rooms, LinkedHashSet<Hallway<E>> hallways
     ) {
-        Set<Location2D> contentLocations = new HashSet<>();
-        Set<Location2D> marginLocations = new HashSet<>();
+        LinkedHashSet<Terrain<E>> terrains = new LinkedHashSet<Terrain<E>>() {
+            {
+                addAll(rooms);
+                addAll(hallways);
+            }
+        };
 
-        Collection<WithMargin<Location2D>> terrains = new HashSet<>();
-        terrains.addAll(rooms);
-        terrains.addAll(hallways);
-
-        getBordersAndMargins(terrains, contentLocations, marginLocations);
-
-        Location2D doorLocation = generateRandomDoorLocation(
-                contentLocations, marginLocations, random
-        );
-
-        return new Door(doorLocation);
+        LinkedHashSet<E> content = getContent(terrains);
+        LinkedHashSet<E> margin = getMargin(terrains, content);
+        E doorLocation = generateRandomDoorLocation(content, margin);
+        return new SmallDoor<>(doorLocation);
     }
 
-    private static Location2D generateRandomDoorLocation(
-            Set<Location2D> contentLocations, Set<Location2D> marginLocations, Random random
+    private static <E extends Location<E>> LinkedHashSet<E> getContent(
+        LinkedHashSet<Terrain<E>> terrains
     ) {
-        List<Location2D> availableDoorLocations = new ArrayList<>();
+        LinkedHashSet<E> content = new LinkedHashSet<>();
 
-        for (Location2D marginLocation : marginLocations) {
+        for (Terrain<E> terrain : terrains) {
+            content.addAll(terrain.getContent());
+        }
+
+        return content;
+    }
+
+    private static <E extends Location<E>> LinkedHashSet<E> getMargin(
+        LinkedHashSet<Terrain<E>> terrains, LinkedHashSet<E> content
+    ) {
+        LinkedHashSet<E> margin = new LinkedHashSet<>();
+
+        for (Terrain<E> terrain : terrains) {
+            for (E location : terrain.getMargin()) {
+                if (!content.contains(location)) {
+                    margin.add(location);
+                }
+            }
+        }
+
+        return margin;
+    }
+
+    private static <E extends Location<E>> E generateRandomDoorLocation(
+        LinkedHashSet<E> content, LinkedHashSet<E> margin
+    ) {
+        List<E> availableDoorLocations = new ArrayList<>();
+
+        for (E marginLocation : margin) {
             int internalCount = 0;
             int externalCount = 0;
-            for (Location2D neighbourLocation : marginLocation.getCloseNeighbours(1)) {
-                if (contentLocations.contains(neighbourLocation)) {
+            for (E neighbourLocation : marginLocation.getCloseNeighbours()) {
+                if (content.contains(neighbourLocation)) {
                     internalCount += 1;
-                } else if (!marginLocations.contains(neighbourLocation)) {
+                } else if (!margin.contains(neighbourLocation)) {
                     externalCount += 1;
                 }
             }
@@ -62,29 +89,11 @@ public class Doors {
             }
         }
 
-        Location2D doorLocation = availableDoorLocations.get(
-                random.nextInt(availableDoorLocations.size())
+        E doorLocation = availableDoorLocations.get(
+            Context.random().nextInt(availableDoorLocations.size())
         );
 
         return doorLocation;
-    }
-
-    private static <E extends WithMargin<Location2D>> void getBordersAndMargins(
-            Collection<E> terrains,
-            Set<Location2D> contentLocations,
-            Set<Location2D> marginLocations
-    ) {
-        for (E terrain: terrains) {
-            contentLocations.addAll(terrain.getContent());
-        }
-
-        for (E terrain: terrains) {
-            for (Location2D marginLocation : terrain.getMargin()) {
-                if (!contentLocations.contains(marginLocation)) {
-                    marginLocations.add(marginLocation);
-                }
-            }
-        }
     }
 
 }

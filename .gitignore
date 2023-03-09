@@ -8,6 +8,7 @@
 !README.md
 **/.*/
 **/out/
+archive.txt
 .class
 *.log
 *.ctxt

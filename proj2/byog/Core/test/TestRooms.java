@@ -1,25 +1,42 @@
 package byog.Core.test;
 
-import byog.Core.coordinates.Location2D;
+import byog.Core.context.Context;
+import byog.Core.coordinate.Location2D;
+import byog.Core.terrain.concrete.RectangularRoom;
+import byog.Core.terrain.view.Room;
 import org.junit.Test;
 import static org.junit.Assert.*;
-
-import byog.Core.terrain.Room;
-import byog.Core.terrain.Rooms;
 
 /**
  * Test the function of Rooms.
  */
 public class TestRooms {
 
+    private static final int WIDTH = 30;
+    private static final int HEIGHT = 30;
+    private static final int HUD_HEIGHT = 0;
+
+    public static final int[] SHAPE = {WIDTH, HEIGHT};
+
     /**
      * Test the function isOverlap.
      */
     @Test
     public void testOverlap() {
-        Room thisRoom = new Room(new Location2D(5, 5), 10, 10);
-        Room thatRoom = new Room(new Location2D(10, 10), 6, 6);
-        assertTrue(Rooms.isOverlap(thisRoom, thatRoom));
+        Location2D.initialize(SHAPE);
+
+        Context<Location2D> context = new Context<>(
+            WIDTH, HEIGHT, HUD_HEIGHT, Location2D.origin(), SHAPE
+        );
+        Context.setDefault(context);
+
+        Room<Location2D> thisRoom = new RectangularRoom<>(
+            Location2D.locateAt(5, 5), new int[]{10, 10}
+        );
+        Room<Location2D> thatRoom = new RectangularRoom<>(
+            Location2D.locateAt(10, 10), new int[]{6, 6}
+        );
+        assertTrue(thisRoom.isOverlap(thatRoom));
     }
 
     /**
@@ -27,17 +44,28 @@ public class TestRooms {
      */
     @Test
     public void testMargin() {
-        Room thisRoom = new Room(new Location2D(5, 5), 10, 10);
-        Room thatRoom = new Room(new Location2D(10, 15), 6, 6);
-        assertTrue(Rooms.isMargin(thisRoom, thatRoom));
+        Location2D.initialize(SHAPE);
 
-        thisRoom = new Room(new Location2D(5, 5), 10, 10);
-        thatRoom = new Room(new Location2D(15, 15), 6, 6);
-        assertFalse(Rooms.isMargin(thisRoom, thatRoom));
+        Context<Location2D> context = new Context<>(
+            WIDTH, HEIGHT, HUD_HEIGHT, Location2D.origin(), SHAPE
+        );
+        Context.setDefault(context);
 
-        thisRoom = new Room(new Location2D(5, 5), 10, 1);
-        thatRoom = new Room(new Location2D(5, 10), 6, 1);
-        assertFalse(Rooms.isMargin(thisRoom, thatRoom));
+        Room<Location2D> thisRoom = new RectangularRoom<>(
+            Location2D.locateAt(5, 5), new int[]{10, 10}
+        );
+        Room<Location2D> thatRoom = new RectangularRoom<>(
+            Location2D.locateAt(10, 15), new int[]{6, 6}
+        );
+        assertTrue(thisRoom.isMargin(thatRoom));
+
+        thisRoom = new RectangularRoom<>(Location2D.locateAt(5, 5), new int[]{10, 10});
+        thatRoom = new RectangularRoom<>(Location2D.locateAt(15, 15), new int[]{6, 6});
+        assertFalse(thisRoom.isMargin(thatRoom));
+
+        thisRoom = new RectangularRoom<>(Location2D.locateAt(5, 5), new int[]{10, 1});
+        thatRoom = new RectangularRoom<>(Location2D.locateAt(5, 10), new int[]{6, 1});
+        assertFalse(thisRoom.isMargin(thatRoom));
     }
 
 }

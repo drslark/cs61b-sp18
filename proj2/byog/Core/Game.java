@@ -1,17 +1,10 @@
 package byog.Core;
 
-import java.util.Collection;
-import java.util.Random;
-
-import byog.Core.input.ActionParser;
-import byog.Core.terrain.Canvas;
-import byog.Core.terrain.Door;
-import byog.Core.terrain.Doors;
-import byog.Core.terrain.Hallway;
-import byog.Core.terrain.Hallways;
-import byog.Core.terrain.Room;
-import byog.Core.terrain.Rooms;
-import byog.Core.tile.Filler;
+import byog.Core.context.Context;
+import byog.Core.coordinate.Location2D;
+import byog.Core.interaction.string.StringInterface;
+import byog.Core.interaction.ui.MainMenuInterface;
+import byog.Core.interaction.ui.InteractiveInterface;
 import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 
@@ -20,18 +13,27 @@ public class Game {
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
     public static final int HEIGHT = 30;
+    public static final int HUD_HEIGHT = 5;
 
-    /**
-     * Returns the game's te-renderer.
-     */
-    public TERenderer getTERenderer() {
-        return ter;
-    }
+    public static final int[] SHAPE = {WIDTH, HEIGHT};
+    public static final String ARCHIVE_FILE = "archive.txt";
 
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
      */
     public void playWithKeyboard() {
+        Location2D.initialize(SHAPE);
+
+        Context<Location2D> context = new Context<>(
+            WIDTH, HEIGHT, HUD_HEIGHT, Location2D.origin(), SHAPE, ARCHIVE_FILE
+        );
+        Context.setDefault(context);
+
+        MainMenuInterface<Location2D> mainMenuInterface = new MainMenuInterface<>();
+        mainMenuInterface.renderStartMenu();
+
+        InteractiveInterface<Location2D> interactiveInterface = new InteractiveInterface<>();
+        interactiveInterface.renderInteractiveInterface();
     }
 
     /**
@@ -43,25 +45,21 @@ public class Game {
      * world. However, the behavior is slightly different. After playing with "n123sss:q", the game
      * should save, and thus if we then called playWithInputString with the string "l", we'd expect
      * to get the exact same world back again, since this corresponds to loading the saved game.
+     *
      * @param input the input string to feed to your program
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] playWithInputString(String input) {
-        ActionParser actionParser = new ActionParser(input);
-        Random random = new Random(actionParser.getSeed());
+        Location2D.initialize(Game.SHAPE);
 
-        Canvas canvas = new Canvas(WIDTH, HEIGHT);
-        TETile[][] finalWorldFrame = new TETile[canvas.getWidth()][canvas.getHeight()];
+        Context<Location2D> context = new Context<>(
+            WIDTH, HEIGHT, HUD_HEIGHT, Location2D.origin(), SHAPE, ARCHIVE_FILE
+        );
+        Context.setDefault(context);
 
-        Collection<Room> rooms = Rooms.generateRandomRooms(canvas, 50, random);
-        Collection<Hallway> hallways = Hallways.generateHallways(canvas, rooms, random);
-        Door door = Doors.generateRandomDoor(rooms, hallways, random);
+        StringInterface<Location2D> stringInterface = new StringInterface<>();
 
-        Filler.fillBackGround(finalWorldFrame);
-        Filler.fillRooms(finalWorldFrame, rooms);
-        Filler.fillHallways(finalWorldFrame, hallways);
-        Filler.fillDoor(finalWorldFrame, door);
-
-        return finalWorldFrame;
+        return stringInterface.process(input);
     }
+
 }

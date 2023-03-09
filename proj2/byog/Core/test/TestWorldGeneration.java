@@ -2,36 +2,39 @@ package byog.Core.test;
 
 import java.util.Random;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import byog.Core.Game;
+import byog.Core.utils.RandomUtils;
+import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 /**
  * Test the game.
  */
-public class TestGame {
+public class TestWorldGeneration {
 
     /**
-     * Test the game visually.
+     * Test the world generation visually.
      */
-    public static void testGameVisual() {
-        String input = "N" + new Random().nextLong() + "S";
+    public static void testVisual() {
+        String input = "N" + RandomUtils.nextPositiveLong(new Random()) + "S";
+
+        TERenderer ter = new TERenderer();
+        ter.initialize(Game.WIDTH, Game.HEIGHT);
 
         Game game = new Game();
-        game.getTERenderer().initialize(Game.WIDTH, Game.HEIGHT);
         TETile[][] tiles = game.playWithInputString(input);
-        game.getTERenderer().renderFrame(tiles);
+        ter.renderFrame(tiles);
     }
 
     /**
-     * Test the game twice with same seed.
+     * Test the world generation twice with same seed.
      */
     @Test
-    public void testGameRepeatable() {
+    public void testRepeatable() {
         for (int i = 0; i < 5000; i++) {
-            String input = "N" + new Random().nextLong() + "S";
+            String input = "N" + RandomUtils.nextPositiveLong(new Random()) + "S";
 
             Game game = new Game();
             TETile[][] firstTiles = game.playWithInputString(input);
@@ -49,7 +52,7 @@ public class TestGame {
     }
 
     public static void main(String[] args) {
-        testGameVisual();
+        testVisual();
     }
 
 }

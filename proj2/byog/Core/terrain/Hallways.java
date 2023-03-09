@@ -1,16 +1,20 @@
 package byog.Core.terrain;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Deque;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Random;
+import java.util.Set;
 
 import byog.Core.algorithms.AStar;
 import byog.Core.algorithms.AdjacencyListGraph;
 import byog.Core.algorithms.Edge;
 import byog.Core.algorithms.Prim;
-import byog.Core.coordinates.Location2D;
+import byog.Core.context.Context;
+import byog.Core.coordinate.Location;
+import byog.Core.terrain.concrete.NarrowHallway;
+import byog.Core.terrain.view.Hallway;
+import byog.Core.terrain.view.Room;
 
 /**
  * Hallway management.
@@ -18,66 +22,65 @@ import byog.Core.coordinates.Location2D;
 public class Hallways {
 
     /**
-     * Generates random hallways with regard of a collection of rooms.
+     * Generates random hallways with regard of a set of rooms.
      *
-     * @param canvas The canvas of the background.
-     * @param rooms A collection of rooms.
-     * @param random A pseudorandom generator.
-     * @return Generated rooms.
+     * @param rooms A set of rooms.
+     * @return The generated rooms.
      */
-    public static Collection<Hallway> generateHallways(
-        Canvas canvas, Collection<Room> rooms, Random random
+    public static <E extends Location<E>> LinkedHashSet<Hallway<E>> generateRandomHallways(
+        LinkedHashSet<Room<E>> rooms
     ) {
-        List<Room> orderedRooms = new ArrayList<>(rooms);
+        List<Room<E>> orderedRooms = new ArrayList<>(rooms);
         List<Edge> roomIndexPairs = getRoomIndexPairs(orderedRooms);
-        int[][] templateMap = generateTemplateMap(canvas, orderedRooms);
-        Collection<Hallway> hallways = connectRoomsWithHallways(
-            orderedRooms, roomIndexPairs, templateMap, random
+        LinkedHashSet<Hallway<E>> hallways = connectRoomsWithHallways(
+            orderedRooms, roomIndexPairs
         );
         return hallways;
     }
 
-    private static Collection<Hallway> connectRoomsWithHallways(
-        List<Room> rooms, List<Edge> roomIndexPairs, int[][] templateMap, Random random
+    private static <E extends Location<E>> LinkedHashSet<Hallway<E>> connectRoomsWithHallways(
+        List<Room<E>> rooms, List<Edge> roomIndexPairs
     ) {
-        // Hallway paths
-        List<Hallway> hallways = new ArrayList<>();
+        // hallway paths
+        LinkedHashSet<Hallway<E>> hallways = new LinkedHashSet<>();
 
         // Connect rooms with hallways
+        LinkedHashSet<E> skeletonLocations = getSkeletonLocations(rooms);
         for (Edge edge : roomIndexPairs) {
-            Room thisRoom = rooms.get(edge.either());
-            Room thatRoom = rooms.get(edge.other());
+            Room<E> thisRoom = rooms.get(edge.either());
+            Room<E> thatRoom = rooms.get(edge.other());
 
-            if (!Rooms.isMargin(thisRoom, thatRoom)) {
-                // prepare for A*
-                fillRoomsInTemplateMap(templateMap, new Room[]{thisRoom, thatRoom}, 0);
-
-                AStar aStar = new AStar(templateMap, random);
-                Deque<Location2D> locations = aStar.connect(
-                        thisRoom.getCenterLocation(), thatRoom.getCenterLocation()
+            if (!thisRoom.isMargin(thatRoom)) {
+                List<Room<E>> includedRooms = new ArrayList<Room<E>>() {
+                    {
+                        add(thisRoom);
+                        add(thatRoom);
+                    }
+                };
+                LinkedHashSet<E> passableLocations = getPassableLocations(
+                    skeletonLocations, includedRooms
                 );
-
-                // cancel prepare for A*
-                fillRoomsInTemplateMap(templateMap, new Room[]{thisRoom, thatRoom}, 1);
-                hallways.add(new Hallway(locations));
+                AStar<E> aStar = new AStar<>(passableLocations, Context.random());
+                Deque<E> locations = aStar.connect(
+                    thisRoom.getCenter(), thatRoom.getCenter()
+                );
+                hallways.add(new NarrowHallway<>(new LinkedHashSet<>(locations)));
             }
         }
-
         return hallways;
     }
 
-    private static List<Edge> getRoomIndexPairs(List<Room> rooms) {
+    private static <E extends Location<E>> List<Edge> getRoomIndexPairs(List<Room<E>> rooms) {
         int[][] adjacencyMatrixGraph = new int[rooms.size()][rooms.size()];
         for (int i = 0; i < rooms.size(); i++) {
             for (int j = i; j < rooms.size(); j++) {
                 if (i == j) {
                     adjacencyMatrixGraph[i][j] = -1;
                 } else {
-                    Room ithRoom = rooms.get(i);
-                    Room jthRoom = rooms.get(j);
-                    int manhattanDistance = Location2D.manhattanDistance(
-                            ithRoom.getCenterLocation(), jthRoom.getCenterLocation()
-                    );
+                    Room<E> ithRoom = rooms.get(i);
+                    Room<E> jthRoom = rooms.get(j);
+                    int manhattanDistance =
+                        ithRoom.getCenter().manhattanDistance(jthRoom.getCenter());
                     adjacencyMatrixGraph[i][j] = manhattanDistance;
                     adjacencyMatrixGraph[j][i] = manhattanDistance;
                 }
@@ -87,39 +90,26 @@ public class Hallways {
         return new Prim(new AdjacencyListGraph(adjacencyMatrixGraph)).sortedEdges();
     }
 
-    private static int[][] generateTemplateMap(Canvas canvas, List<Room> rooms) {
-        // template map
-        int[][] templateMap = new int[canvas.getWidth()][canvas.getHeight()];
-        for (int i = 0; i < templateMap.length; i++) {
-            templateMap[i][0] = -1;
-            templateMap[i][canvas.getHeight() - 1] = -1;
+    private static <E extends Location<E>> LinkedHashSet<E> getSkeletonLocations(
+        List<Room<E>> allRooms
+    ) {
+        LinkedHashSet<E> skeletonLocations = new LinkedHashSet<>(Context.content());
+        skeletonLocations.removeAll((Set<E>) Context.border());
+        for (Room<E> room : allRooms) {
+            skeletonLocations.removeAll(room.getContent());
         }
 
-        // border can not access
-        for (int i = 0; i < templateMap[0].length; i++) {
-            templateMap[0][i] = -1;
-            templateMap[canvas.getWidth() - 1][i] = -1;
-        }
-
-        for (Room room : rooms) {
-            for (int i = 0; i < room.getWidth(); i++) {
-                for (int j = 0; j < room.getHeight(); j++) {
-                    templateMap[room.getAnchorX() + i][room.getAnchorY() + j] = 1;
-                }
-            }
-        }
-
-        return templateMap;
+        return skeletonLocations;
     }
 
-    private static void fillRoomsInTemplateMap(int[][] templateMap, Room[] rooms, int value) {
-        for (Room room : rooms) {
-            for (int i = 0; i < room.getWidth(); i++) {
-                for (int j = 0; j < room.getHeight(); j++) {
-                    templateMap[room.getAnchorX() + i][room.getAnchorY() + j] = value;
-                }
-            }
+    private static <E extends Location<E>> LinkedHashSet<E> getPassableLocations(
+        LinkedHashSet<E> skeletonLocations, List<Room<E>> includedRooms
+    ) {
+        LinkedHashSet<E> passableLocations = new LinkedHashSet<>(skeletonLocations);
+        for (Room<E> room : includedRooms) {
+            passableLocations.addAll(room.getContent());
         }
+        return passableLocations;
     }
 
 }
